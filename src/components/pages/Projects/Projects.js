@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProjectService from "../../../services/Project.service";
+import CategoryService from "../../../services/Category.service";
 import Message from '../../forms/Message/Message';
 import Container from '../../layout/Container/Container';
 import LinkButton from '../../forms/LinkButton/LinkButton';
@@ -9,7 +10,8 @@ import Loader from '../../forms/Loader/Loader';
 import styles from './Projects.module.css';
 
 function Projects(){
-     const service = new ProjectService();
+    const projectService = new ProjectService();
+    const categoryService = new CategoryService();
     const location = useLocation();
     const [projects, setProjects] = useState([]);
     const [removeLoader, setRemoveLoader] = useState(false);
@@ -23,7 +25,7 @@ function Projects(){
 
     useEffect(() => {
         setTimeout(() =>{
-            service.list()
+            projectService.list()
             .then(resp  => resp.json())
             .then(data => {
                 setProjects(data);
@@ -34,7 +36,7 @@ function Projects(){
     }, []);
 
     function removeProject(id){
-        service.remove(id)
+        projectService.remove(id)
         .then(resp => resp.json)
         .then(() => {
             setProjects(projects.filter((project) => project.id !== id))
@@ -55,8 +57,8 @@ function Projects(){
                 {projects.length > 0 && 
                     projects.map((project) =>(
                         <ProjectCard 
-                        key={project.id}
-                        id={project.id} 
+                        key={project._id}
+                        id={project._id} 
                         name={project.name} 
                         category={project.category.name} 
                         budget={project.budget}  

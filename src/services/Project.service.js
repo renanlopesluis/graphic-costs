@@ -3,7 +3,7 @@ import CrudService from './Crud.service.js';
 class ProjectService extends CrudService{
 
     constructor(){
-        super('project');
+        super('projects');
     }
 }
 

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export default class CrudService {
 
-    baseUrl = 'http://localhost:8080/graphic-costs/';
+    baseUrl = 'http://localhost:5000/graphicapi/';
     urli = '';
     
     constructor(uri){

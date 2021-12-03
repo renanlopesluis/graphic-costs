@@ -1,13 +1,13 @@
-import { v4 as uuidv4 } from 'uuid';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+
 import ProjectService from '../../../services/Project.service';
 import ServiceService from '../../../services/Service.service';
+import Loader from '../../forms/Loader/Loader';
 import Message from '../../forms/Message/Message';
 import ProjectForm from '../../forms/ProjectForm/ProjectForm';
-import ServiceForm from '../../forms/ServiceForm/ServiceForm';
 import ServiceCard from '../../forms/ServiceCard/ServiceCard';
-import Loader from '../../forms/Loader/Loader';
+import ServiceForm from '../../forms/ServiceForm/ServiceForm';
 import Container from '../../layout/Container/Container';
 import styles from './Project.module.css';
 
@@ -25,9 +25,8 @@ function Project(){
     useEffect(() => {
         setTimeout(() =>{
             projectService.get(id)
-            .then(resp  => resp.json())
-            .then(data => {
-                setProject(data)
+            .then(resp => {
+                setProject(resp.data[0]);
             })
             .catch(error => console.log(error))
         },1000)
@@ -37,9 +36,21 @@ function Project(){
         projectService.update(project)
         .then((resp) => resp.json())
         .then((data)=> {
+            console.log(data);
             setProject(data);   
             setShowProjectForm(false);
             setMessage('Plano atualizado com sucesso!');
+            setType('success');
+        })
+        .catch((error)=>console.log(error))
+    }
+
+    function put(project){
+        projectService.update(project)
+        .then(()=> {
+            setProject(project);   
+            setShowProjectForm(false);
+            setMessage('Produto adicionado com sucesso!');
             setType('success');
         })
         .catch((error)=>console.log(error))
@@ -71,7 +82,7 @@ function Project(){
                 (service) => service.id !== id
             );
             project.cost = parseFloat(project.cost) - cost;
-            patch(project);
+            put(project);
         })
         .catch((error)=>console.log(error))
     }
@@ -79,8 +90,6 @@ function Project(){
     function createService(project){
         setMessage('');
         const lastService = project.services[project.services.length -1];
-        lastService.id = uuidv4();
-        console.log(project.services)
         const lastServiceCost = lastService.cost;
         const newCost = parseFloat(project.cost) + parseFloat(lastServiceCost);
 
@@ -91,10 +100,9 @@ function Project(){
             return false;
         }
         serviceService.insert(lastService)
-            .then((resp) => resp.json())
             .then(()=> {
                 project.cost = newCost;
-                patch(project);
+                put(project);
             })
         .catch((error)=>console.log(error));
     }
@@ -148,8 +156,8 @@ function Project(){
                         {project.services.length > 0 &&
                             project.services.map((service)=>(
                                 <ServiceCard  
-                                    id={service.id}
-                                    key={service.id}
+                                    id={service._id}
+                                    key={service._id}
                                     name={service.name}
                                     description={service.description}
                                     cost={service.cost}

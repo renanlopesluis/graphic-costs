@@ -9,7 +9,6 @@ function NewProject(){
     const service = new ProjectService();
 
     function createPost(project) {
-        
         project.cost = 0;
         project.services = [];
 
@@ -22,7 +21,7 @@ function NewProject(){
     }
     return (
         <div className={styles.newProjectContainer}>
-            <h1>Orçamento</h1>
+            <h1>Novo Plano</h1>
             <p>Faça um orçamento para seu plano</p>
             <Form btnText="Criar" handleSubmit={createPost}/>
         </div>

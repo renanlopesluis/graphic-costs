@@ -10,10 +10,12 @@ function ProjectForm({btnText, handleSubmit, projectData}){
     const [categories, setCategories] = useState([]);
     const [project, setProject] = useState(projectData || {});
 
-   categoryService.list()
-        .then( resp  => resp.json())
-        .then( data => setCategories(data))
-        .catch( error => console.log(error));
+    useEffect(() => 
+        {categoryService.list()
+            .then( resp  => resp.json())
+            .then( data => setCategories(data))
+            .catch( error => console.log(error));
+        },[]);
 
     const submit = (e) =>{
         e.preventDefault();
@@ -26,7 +28,7 @@ function ProjectForm({btnText, handleSubmit, projectData}){
 
     function handleOnSelect(e){
         setProject({ ...project, category: {
-            id: e.target.value,
+            _id: e.target.options[e.target.selectedIndex].value,
             name: e.target.options[e.target.selectedIndex].text
         }});
     }
@@ -40,7 +42,7 @@ function ProjectForm({btnText, handleSubmit, projectData}){
                 id="budget" name="budget" text="Orçamento Total" handleOnChange={handleOnChange}
             />
             <Select id="category" name="category" text="Categoria" options={categories} handleOnChange={handleOnSelect}
-                value={project.category ? project.category.id : ''}/>
+                value={project.category ? project.category._id : ''}/>
              <SubmitButton text={btnText}/>
         </form>
     );
