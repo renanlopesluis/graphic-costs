@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProjectService from "../../../services/Project.service";
-import CategoryService from "../../../services/Category.service";
 import Message from '../../forms/Message/Message';
 import Container from '../../layout/Container/Container';
 import LinkButton from '../../forms/LinkButton/LinkButton';
@@ -11,7 +10,6 @@ import styles from './Projects.module.css';
 
 function Projects(){
     const projectService = new ProjectService();
-    const categoryService = new CategoryService();
     const location = useLocation();
     const [projects, setProjects] = useState([]);
     const [removeLoader, setRemoveLoader] = useState(false);

@@ -33,7 +33,7 @@ export default class CrudService {
     }
 
     remove(id){
-        return axios.delete(this.baseUrl.concat(this.uri), {params:{id: id }});
+        return axios.delete(this.baseUrl.concat(this.uri).concat('/').concat(id));
     }
 
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
 import ProjectService from '../../../services/Project.service';
 import ServiceService from '../../../services/Service.service';
 import Loader from '../../forms/Loader/Loader';
@@ -47,8 +46,8 @@ function Project(){
 
     function put(project){
         projectService.update(project)
-        .then(()=> {
-            setProject(project);   
+        .then((resp)=> {
+            setProject(resp.data);   
             setShowProjectForm(false);
             setMessage('Produto adicionado com sucesso!');
             setType('success');
@@ -76,10 +75,9 @@ function Project(){
 
     function removeService(id, cost){
         serviceService.remove(id)
-        .then((resp) => resp.json())
         .then(()=> {
             project.services = project.services.filter(
-                (service) => service.id !== id
+                (service) => service._id !== id
             );
             project.cost = parseFloat(project.cost) - cost;
             put(project);
@@ -100,8 +98,10 @@ function Project(){
             return false;
         }
         serviceService.insert(lastService)
-            .then(()=> {
+            .then((resp) => {
                 project.cost = newCost;
+                project.services.pop();
+                project.services.push(resp.data);
                 put(project);
             })
         .catch((error)=>console.log(error));
