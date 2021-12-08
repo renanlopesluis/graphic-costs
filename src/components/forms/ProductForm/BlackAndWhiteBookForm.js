@@ -4,11 +4,14 @@ import styles from '../../forms/ProjectForm/ProjectForm.module.css';
 import Input from '../Input/Input';
 import Select from '../Select/Select';
 import SubmitButton from '../SubmitButton/SubmitButton';
-import CategoryTypeEnum from '../../enums/CategoryType.enum';
+import CategoryTypeEnum from '../../../enums/CategoryType.enum';
 
-function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
+function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, serviceData){
     const categoryService = new CategoryService();
-    const [service, setService] = useState({});
+    let [service, setService] = useState({});
+    let [serviceDetails, setServiceDetails] = useState([]);
+    const [quantities, setQuantities] = useState([]);  
+    const [quantity, setQuantity] = useState({});
     const [formatTypes, setFormatTypes] = useState([]);
     const [coverLaminationTypes, setCoverLaminationTypes] = useState([]);
     const [coverPrintingTypes, setCoverPrintingTypes] = useState([]);
@@ -18,38 +21,61 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
     const [coverEarTypes, setCoverEarTypes] = useState([]);
 
     useEffect(() => {
-        categoryService.list(CategoryTypeEnum.FORMAT_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.FORMAT_TYPE)
         .then( resp => setFormatTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.COVER_LAMINATION_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.COVER_LAMINATION_TYPE)
         .then( resp => setCoverLaminationTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.COVER_PRINTING_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.COVER_PRINTING_TYPE)
         .then( resp => setCoverPrintingTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.COVER_PAPER_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.COVER_PAPER_TYPE)
         .then( resp => setCoverPaperTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.KERNEL_PRINTING_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.KERNEL_PRINTING_TYPE)
         .then( resp => setKernelPrintingTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.KERNEL_PAPER_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.KERNEL_PAPER_TYPE)
         .then( resp => setKernelPaperTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.KERNEL_PAPER_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.KERNEL_PAPER_TYPE)
         .then( resp => setKernelPaperTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.COVER_PAPER_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.COVER_PAPER_TYPE)
         .then( resp => setCoverEarTypes(resp.data))
         .catch( error => console.log(error));
+
+        categoryService.list(serviceData.id, CategoryTypeEnum.QUANTITY)
+        .then( resp => setQuantities(resp.data))
+        .catch( error => console.log(error));
     },[]);
+
+    function calculate(){
+        service.amount = service.cost * quantity.cost;
+        setService(service);
+    }
+    
+    function recalculate(categoryId){
+        if(serviceDetails.length > 0){
+            serviceDetails = serviceDetails.filter(detail=>detail.categoryId !== categoryId)
+        }
+        serviceDetails.push({categoryId: categoryId});
+        setServiceDetails(serviceDetails);
+        service.cost = 0;
+        serviceDetails.forEach(detail => {
+            service.cost = service.cost + detail.cost;
+        })
+        service.serviceDetails = serviceDetails;
+        calculate();
+    }
 
     function submit(e){
         e.preventDefault();
@@ -57,13 +83,13 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
         handleSubmit(projectData);
     }
 
-    function calculate(e){
-        service.detail.quantity = e.target.value;
-        service.cost = productData.price * e.target.value;
-        setService(service);
-    }
-
     function handleOnChange(e){
+        const quantity = quantities.filter(
+            format => format.id === 
+            e.target.options[e.target.selectedIndex].value
+        );
+        setQuantity(quantity);
+        calculate();
     }
 
     function handleOnSelectFormat(e){
@@ -71,7 +97,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.formatType = formatType;
+        recalculate(formatType.id)
     }
     
     function handleOnSelectCoverPrinting(e){
@@ -79,7 +105,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.coverPrintingType = printing;
+        recalculate(printing.id)
     }
 
     function handleOnSelectCoverLamination(e){
@@ -87,7 +113,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.coverLaminationType = lamination;
+        recalculate(lamination.id)
     }
 
     function handleOnSelectCoverPaper(e){
@@ -95,7 +121,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.coverPaperType = coverPaper;
+        recalculate(coverPaper.id)
     }
 
     function handleOnSelectKernelPrinting(e){
@@ -103,7 +129,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.kernelPrintingType = kernelPrinting;
+        recalculate(kernelPrinting.id)
     }
 
     function handleOnSelectKernelPaper(e){
@@ -111,7 +137,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.kernelPaperType = kernelPaper;
+        recalculate(kernelPaper.id)
     }
 
     function handleOnSelectCoverEar(e){
@@ -119,15 +145,15 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.coverEarType = coverEar;
+        recalculate(coverEar.id)
     }
 
     return (
         <form onSubmit={submit} className={styles.form}>  
-            <Input type="text" text="Nome do Produto"  id="name" name="name" disabled value={productData.name}/>  
+            <Input type="text" text="Nome do Produto"  id="name" name="name" disabled value={serviceData.name}/>  
 
-            <Input type="number" placeholder="Insira a quantidade do produto" id="quantity" 
-                name="quantity" text="Quantidade" handleOnChange={calculate}
+            <Select id="quantity" name="quantity" text="Quantidade" options={quantities} handleOnChange={handleOnChange}
+                value={quantities ? quantities.id : ''}
             />
              <Input type="number" placeholder="Insira o número de páginas" id="pageQuantity" 
                 name="pageQuantity" text="Número de páginas" handleOnChange={handleOnChange}
@@ -153,7 +179,7 @@ function BlackAndWhiteBookForm(btnText, handleSubmit, projectData, productData){
             <Select id="coverLaminationType" name="coverLaminationType" text="Laminação na capa" options={coverLaminationTypes} handleOnChange={handleOnSelectCoverLamination}
                 value={coverLaminationTypes ? coverLaminationTypes.id : ''}
             />
-            <Input type="number" text="Valor Unitário" id="name" name="name" disabled value={productData.price}/>  
+            <Input type="number" text="Valor Unitário" id="name" name="name" disabled value={serviceData.price}/>  
 
             <Input type="number" text="Valor Total" id="cost" name="cost" disabled value={service.cost}/>  
 

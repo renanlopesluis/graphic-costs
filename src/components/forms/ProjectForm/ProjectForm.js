@@ -1,36 +1,23 @@
-import {useState, useEffect} from 'react';
-import CategoryService from '../../../services/Category.service';
+import { useState } from 'react';
 import styles from './ProjectForm.module.css';
 import Input from '../../forms/Input/Input';
-import Select from '../../forms/Select/Select';
+import EmailService from '../../../services/Email.service';
 import SubmitButton from '../../forms/SubmitButton/SubmitButton';
 
 function ProjectForm({btnText, handleSubmit, projectData}){
-    const categoryService = new CategoryService();
-    const [categories, setCategories] = useState([]);
+    const emailService = new EmailService();
     const [project, setProject] = useState(projectData || {});
-
-    useEffect(() => 
-        {categoryService.list()
-            .then( resp  => resp.json())
-            .then( data => setCategories(data))
-            .catch( error => console.log(error));
-        },[]);
 
     const submit = (e) =>{
         e.preventDefault();
         handleSubmit(project);
+        if(project.id &&  project.services && project.services.lenght > 0){
+            emailService.send(project, {name:"Cliente Fulano"});
+        }
     }
 
     function handleOnChange(e){
         setProject({ ...project, [e.target.name]: e.target.value});
-    }
-
-    function handleOnSelect(e){
-        setProject({ ...project, category: {
-            _id: e.target.options[e.target.selectedIndex].value,
-            name: e.target.options[e.target.selectedIndex].text
-        }});
     }
 
     return (
@@ -41,8 +28,6 @@ function ProjectForm({btnText, handleSubmit, projectData}){
             <Input type="number" placeholder="Insira o orçamento total"value={project.budget}
                 id="budget" name="budget" text="Orçamento Total" handleOnChange={handleOnChange}
             />
-            <Select id="category" name="category" text="Categoria" options={categories} handleOnChange={handleOnSelect}
-                value={project.category ? project.category._id : ''}/>
              <SubmitButton text={btnText}/>
         </form>
     );

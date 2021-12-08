@@ -44,7 +44,7 @@ module.exports = {
     LAMINATION_TYPE: function(){
         return 15;
     },
-    COVER_PAPER_TYPE: function(){
+    QUANTITY: function(){
         return 16;
     }
 }

@@ -14,6 +14,7 @@ function Project(){
 
     const projectService = new ProjectService();
     const serviceService = new ServiceService();
+    const emailService = new EmailService();
     const { id } = useParams();
     const [project, setProject] = useState({});
     const [showProjectForm, setShowProjectForm] = useState(false);

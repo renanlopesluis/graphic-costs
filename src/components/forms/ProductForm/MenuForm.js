@@ -4,11 +4,14 @@ import styles from '../../forms/ProjectForm/ProjectForm.module.css';
 import Input from '../Input/Input';
 import Select from '../Select/Select';
 import SubmitButton from '../SubmitButton/SubmitButton';
-import CategoryTypeEnum from '../../enums/CategoryType.enum';
+import CategoryTypeEnum from '../../../enums/CategoryType.enum';
 
-function MenuForm(btnText, handleSubmit, projectData, productData){
+function MenuForm(btnText, handleSubmit, projectData, serviceData){
     const categoryService = new CategoryService();
-    const [service, setService] = useState({});
+    let [service, setService] = useState({});
+    let [serviceDetails, setServiceDetails] = useState([]);
+    const [quantities, setQuantities] = useState([]);  
+    const [quantity, setQuantity] = useState({});        
     const [formatTypes, setFormatTypes] = useState([]);
     const [paperTypes, setPaperTypes] = useState([]);
     const [finishingTypes, setFinishingTypes] = useState([]);
@@ -16,28 +19,50 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
     const [printingTypes, setPrintingTypes] = useState([]);
 
     useEffect(() => {
-        categoryService.list(CategoryTypeEnum.FORMAT_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.FORMAT_TYPE)
         .then( resp => setFormatTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.PAPER_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.PAPER_TYPE)
         .then( resp => setPaperTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.FINISHING_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.FINISHING_TYPE)
         .then( resp => setFinishingTypes(resp.data))
         .catch( error => console.log(error));
 
 
-        categoryService.list(CategoryTypeEnum.PRINTING_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.PRINTING_TYPE)
         .then( resp => setPrintingTypes(resp.data))
         .catch( error => console.log(error));
 
-        categoryService.list(CategoryTypeEnum.ENNOBLEMENT_TYPE)
+        categoryService.list(serviceData.id, CategoryTypeEnum.ENNOBLEMENT_TYPE)
         .then( resp => setEnnoblementTypes(resp.data))
         .catch( error => console.log(error));
 
+        categoryService.list(serviceData.id, CategoryTypeEnum.QUANTITY)
+        .then( resp => setQuantities(resp.data))
+        .catch( error => console.log(error));
     },[]);
+
+    function calculate(){
+        service.amount = service.cost * quantity.cost;
+        setService(service);
+    }
+    
+    function recalculate(categoryId){
+        if(serviceDetails.length > 0){
+            serviceDetails = serviceDetails.filter(detail=>detail.categoryId !== categoryId)
+        }
+        serviceDetails.push({categoryId: categoryId});
+        setServiceDetails(serviceDetails);
+        service.cost = 0;
+        serviceDetails.forEach(detail => {
+            service.cost = service.cost + detail.cost;
+        })
+        service.serviceDetails = serviceDetails;
+        calculate();
+    }
 
     function submit(e){
         e.preventDefault();
@@ -45,21 +70,20 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
         handleSubmit(projectData);
     }
 
-    function calculate(e){
-        service.detail.quantity = e.target.value;
-        service.cost = productData.price * e.target.value;
-        setService(service);
-    }
-
     function handleOnChange(e){
+        const quantity = quantities.filter(
+            format => format.id === 
+            e.target.options[e.target.selectedIndex].value
+        );
+        setQuantity(quantity);
+        calculate();
     }
-
     function handleOnSelectFormat(e){
         const formatType = formatTypes.filter(
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.formatType = formatType;
+        recalculate(formatType.id);
     }
     
     function handleOnSelectPaperType(e){
@@ -67,7 +91,7 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.paperType = paperType;
+        recalculate(paperType.id);
     }
 
     function handleOnSelectFinishing(e){
@@ -75,7 +99,7 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.finishingType = finishing;
+        recalculate(finishing.id);
     }
 
     function handleOnSelectEnnoblement(e){
@@ -83,7 +107,7 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.ennoblementType = ennoblement;
+        recalculate(ennoblement.id);
     }
 
     function handleOnSelectPrinting(e){
@@ -91,15 +115,15 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
             format => format.id === 
             e.target.options[e.target.selectedIndex].value
         );
-        service.detail.coverPrintingType = printing;
+        recalculate(printing.id);
     }
 
     return (
         <form onSubmit={submit} className={styles.form}>  
-            <Input type="text" text="Nome do Produto"  id="name" name="name" disabled value={productData.name}/>  
+            <Input type="text" text="Nome do Produto"  id="name" name="name" disabled value={serviceData.name}/>  
 
-            <Input type="number" placeholder="Insira a quantidade" id="quantity" 
-                name="quantity" text="Quantidade" handleOnChange={calculate}
+            <Select id="quantity" name="quantity" text="Quantidade" options={quantities} handleOnChange={handleOnChange}
+                value={quantities ? quantities.id : ''}
             />
             <Select id="formatType" name="formatType" text="Formato" options={formatTypes} handleOnChange={handleOnSelectFormat}
                 value={formatTypes ? formatTypes.id : ''}
@@ -116,7 +140,7 @@ function MenuForm(btnText, handleSubmit, projectData, productData){
             <Select id="finishingType" name="finishingType" text="Acabamento" options={finishingTypes} handleOnChange={handleOnSelectFinishing}
                 value={finishingTypes ? finishingTypes.id : ''}
             />
-            <Input type="number" text="Valor Unitário" id="name" name="name" disabled value={productData.price}/>  
+            <Input type="number" text="Valor Unitário" id="name" name="name" disabled value={serviceData.price}/>  
 
             <Input type="number" text="Valor Total" id="cost" name="cost" disabled value={service.cost}/>  
 
