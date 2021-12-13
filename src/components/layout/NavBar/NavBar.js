@@ -9,7 +9,7 @@ function Layout(){
       <nav className={styles.navbar}>
         <Container>
           <Link to="/">
-            <img src={logo} alt="Gráfica"></img>
+            <img src={logo} alt="Printstore"></img>
           </Link>
           <ul className={styles.list}>
             <li className={styles.item}>

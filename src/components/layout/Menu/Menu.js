@@ -6,6 +6,8 @@ import About from '../../pages/About/About';
 import Projects from '../../pages/Projects/Projects';
 import Project from '../../pages/Project/Project';
 import NewProject from '../../pages/NewProject/NewProject';
+import Register from '../../pages/Register/Register';
+import ChangePassword from '../../pages/ChangePassword/ChangePassword';
 
 function Menu(){
     return (
@@ -15,8 +17,11 @@ function Menu(){
                 <Route path="/projects" element={<Projects/>}/>         
                 <Route path="/newproject" element={<NewProject/>}/>  
                 <Route path="/about" element={<About/>}/>
-                <Route path="/contact" element={ <Contact/>}/>  
-                <Route path="/project/:id" element={ <Project/>}/>  
+                <Route path="/contact" element={<Contact/>}/>  
+                <Route path="/project/:id" element={<Project/>}/>  
+                <Route path="/register" element={<Register/>}/>  
+                <Route path="/changepassword" element={<ChangePassword/>}/>  
+
             </Routes>
         </Container>
     )
